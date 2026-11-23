@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Journey Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: clean, friendly study dashboard — calm, readable, motivating
+   IDEA: a student portal: sidebar, welcome banner, progress, weekly chart, milestones panel
+   PICTURE: welcome banner with a small study-desk illustration; live progress bars + study-time chart
+   COLOUR and TYPE: lavender-grey ground, white cards, indigo lead, coral + blue accents; Poppins
+   LAYOUT: sidebar | main grid | right panel; collapses to one column with top nav on phones */
+:root{color-scheme:light;--bg:#f8f8fb;--card:#ffffff;--ink:#2e2d3d;--mute:#9b9aae;--ind:#7b5ce5;--indS:#efebfd;--cor:#f7a23b;--corS:#fdecd9;--blu:#4b8fe3;--bluS:#e2eefc;--pur:#9b80ea;--rule:#efeff5;--ok:#2f9e6a}
+:root,:root[data-theme=light],:root[data-theme=dark]{color-scheme:light}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:#f1f1f6;color:var(--ink);font:15px/1.55 Poppins,system-ui,sans-serif;overflow-x:clip}
+.app{max-width:1440px;margin:0 auto;padding:clamp(10px,2vw,24px)}
+.shell{display:grid;grid-template-columns:220px minmax(0,1fr) 300px;background:var(--card);border-radius:28px;overflow:hidden;min-height:90vh;box-shadow:0 30px 60px -45px #5b4aa8}
+aside.side{padding:26px 14px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:6px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;padding:0 10px 22px}
+.logo i{width:38px;height:38px;border-radius:11px;background:var(--ind);display:grid;place-items:center;color:#fff;font-style:normal;font-size:18px}
+.side a{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;color:var(--mute);text-decoration:none;font-weight:500;min-height:44px}
+.side a.on{background:var(--indS);color:var(--ind)}
+.side a svg{width:18px;height:18px;flex:none}
+.upsell{margin-top:auto;background:var(--indS);border-radius:16px;padding:16px;font-size:13px;color:var(--mute)}
+.upsell b{display:block;color:var(--ink);font-size:14px;margin-bottom:4px}
+main{background:#fbfbfd;padding:24px clamp(14px,2vw,28px)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+h1{font-size:20px;font-weight:600;margin:0}
+h2{font-size:16px;font-weight:600;margin:0 0 14px}
+h3{font-size:15px;font-weight:600;margin:0}
+.search{flex:0 1 320px;position:relative}
+.search input{width:100%;font:15px Poppins,sans-serif;padding:11px 14px 11px 40px;border:1px solid var(--rule);border-radius:12px;background:var(--card);color:var(--ink);min-height:44px}
+.search svg{position:absolute;left:13px;top:13px;width:18px;height:18px;color:var(--mute)}
+.card{background:var(--card);border-radius:18px;padding:20px}
+.banner{background:var(--indS);border-radius:18px;padding:22px 24px;display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:12px;align-items:center;margin-bottom:18px}
+.banner h2{color:var(--ind);font-size:19px;margin-bottom:6px}
+.banner p{margin:0;max-width:52ch}
+.banner svg{width:100%;height:auto}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.full{grid-column:1/-1}
+.row{display:flex;align-items:center;gap:12px;padding:9px 0}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.row .nm{flex:1}.row .nm small{display:block;color:var(--mute);font-size:12.5px}
+.mini{width:90px;height:5px;background:var(--rule);border-radius:9px;overflow:hidden;flex:none}.mini i{display:block;height:100%}
+.pc{width:44px;text-align:right;font-weight:600;font-size:14px}
+.fig{position:relative;height:200px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button{font:500 14px Poppins,sans-serif;min-height:40px;padding:0 16px;border-radius:10px;border:0;background:var(--indS);color:var(--ind);cursor:pointer}
+button.pri{background:var(--ind);color:#fff}
+button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--blu);outline-offset:2px}
+.streak{display:flex;justify-content:space-between;gap:6px;margin-top:6px}
+.streak div{text-align:center;font-size:12.5px;color:var(--mute);flex:1}
+.streak span{display:grid;place-items:center;width:42px;height:42px;margin:0 auto 6px;border-radius:50%;background:var(--rule);color:var(--mute);font-weight:600}
+.streak span.y{background:var(--pur);color:#fff}.streak span.t{outline:2px solid var(--ind);outline-offset:2px}
+ul.chk{list-style:none;padding:0;margin:0}
+label{display:flex;gap:12px;align-items:flex-start;cursor:pointer;min-height:42px;padding:8px 0}
+input[type=checkbox]{width:20px;height:20px;flex:none;accent-color:var(--ind);margin:2px 0 0}
+label.on>span{text-decoration:line-through;color:var(--mute)}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:11px 10px 11px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;font-size:14px}td.n{white-space:nowrap;color:var(--mute)}
+a{color:var(--ind);font-weight:500;text-underline-offset:3px}
+aside.right{padding:26px 22px;border-left:1px solid var(--rule);display:flex;flex-direction:column;gap:24px}
+.prof{text-align:center}.av{width:76px;height:76px;border-radius:50%;margin:0 auto 10px;background:var(--indS);display:grid;place-items:center;color:var(--ind);font-size:30px;font-weight:600}
+.prof small{color:var(--mute)}
+.ms{display:flex;gap:12px;align-items:flex-start;padding:8px 0}
+.ms i{width:38px;height:38px;border-radius:10px;background:var(--indS);color:var(--ind);display:grid;place-items:center;flex:none;font-style:normal;font-weight:700;font-size:13px}
+.ms small{display:block;color:var(--mute);font-size:12.5px}
+.bal{background:var(--pur);color:#fff;border-radius:18px;padding:20px}
+.bal small{opacity:.8;font-size:12px;letter-spacing:.02em}.bal b{display:block;font-size:30px;font-weight:600;margin:4px 0}
+.badges{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.badge{text-align:center;font-size:11.5px;color:var(--mute)}
+.badge span{display:grid;place-items:center;width:52px;height:52px;margin:0 auto 6px;border-radius:16px;background:var(--rule);font-weight:700;color:var(--mute)}
+.badge.got span{background:linear-gradient(135deg,var(--ind),var(--blu));color:#fff}
+.view{display:none}.view.on{display:block}
+details.st{background:var(--card);border-radius:18px;padding:18px 20px;margin-bottom:14px}
+details.st summary{list-style:none;display:flex;gap:14px;align-items:center;cursor:pointer;flex-wrap:wrap}
+details.st summary::-webkit-details-marker{display:none}
+.num{width:40px;height:40px;border-radius:12px;background:var(--indS);color:var(--ind);display:grid;place-items:center;font-weight:700;flex:none}
+.stg{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:22px;margin-top:14px}
+.goal{background:var(--indS);border-radius:12px;padding:12px 14px;margin-bottom:8px}.goal ul{margin:.3em 0 0;padding-left:1.1em}
+.wkb{color:var(--ind);font-weight:600}
+.vid{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:#f6f5fb;margin-bottom:8px}
+.vid span{font-size:13px;color:var(--mute);white-space:nowrap}
+.ship{border:2px dashed var(--cor);border-radius:12px;padding:10px 14px;margin-top:10px}
+.tier{font-size:12.5px;font-weight:600;border-radius:99px;padding:3px 10px;white-space:nowrap}
+.t1{background:#e3f4ea;color:#23784f}.t2{background:var(--corS);color:#a3600e}.t3{background:var(--indS);color:var(--ind)}
+.prompts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.prompts pre{white-space:pre-wrap;font:13.5px/1.5 Poppins,sans-serif;background:#f6f5fb;border-radius:12px;padding:12px;margin:10px 0;flex:1}
+.prompts .card{display:flex;flex-direction:column}
+.jd{border-left:4px solid var(--cor);padding-left:14px;margin-top:14px}.jd ul{margin:.3em 0;padding-left:1.1em}
+#results:empty{display:none}#results{margin-bottom:18px}
+.res{padding:8px 0;border-bottom:1px solid var(--rule)}.res small{color:var(--mute);display:block}
+@media(max-width:1200px){.shell{grid-template-columns:200px minmax(0,1fr)}aside.right{grid-column:1/-1;border-left:0;border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}}
+@media(max-width:820px){.shell{grid-template-columns:minmax(0,1fr)}aside.side{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--rule);padding:12px}.side a{flex:none}.logo{display:none}.upsell{display:none}.grid,.stg{grid-template-columns:minmax(0,1fr)}.banner{grid-template-columns:minmax(0,1fr)}.banner svg{max-width:200px}}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--rule)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:7.5em;text-align:start;white-space:normal}.stack td::before{content:attr(data-l);float:inline-start;width:7em;margin-inline-start:-7.5em;font-weight:600;color:var(--ink)}.stack td:empty{display:none}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.steam path{animation:rise 3s ease-in-out infinite;opacity:0}.steam path:nth-child(2){animation-delay:1s}
+@keyframes rise{0%{transform:translateY(6px);opacity:0}40%{opacity:.9}100%{transform:translateY(-12px);opacity:0}}
+.nx{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:18px}
+.nc{border-radius:18px;padding:12px 12px 14px;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:var(--ink)}
+.nc .tile{border-radius:14px;height:104px;display:grid;place-items:center}
+.nc .tile svg{width:56px;height:56px}
+.nc b{font-weight:600;font-size:15px;line-height:1.3}.nc small{color:var(--mute);font-size:12.5px}
+.nc .go{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+.nc .arr{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:700}
+.n1{background:var(--corS)}.n1 .tile,.n1 .arr{background:var(--cor)}
+.n2{background:var(--indS)}.n2 .tile,.n2 .arr{background:var(--pur)}
+.n3{background:var(--bluS)}.n3 .tile,.n3 .arr{background:var(--blu)}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));text-align:center;gap:4px 0;font-size:13.5px}
+.cal .h{color:var(--mute);font-size:12px;padding-bottom:6px}
+.cal span{display:grid;place-items:center;width:32px;height:32px;margin:0 auto;border-radius:50%;position:relative}
+.cal .o{color:#c9c8d6}.cal .td{background:var(--ind);color:#fff;font-weight:600}
+.cal .st::after{content:"";position:absolute;bottom:-3px;width:5px;height:5px;border-radius:50%;background:var(--ind)}
+.calh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.hp{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:16px;background:var(--card);box-shadow:0 6px 18px -12px #5b4aa8;margin-bottom:10px}
+.hp.on{background:var(--pur);color:#fff}.hp.on small{color:#efeaff}
+.hp small{display:block;color:var(--mute);font-size:12.5px}
+.ringw{position:relative;width:46px;height:46px;flex:none}.ringw svg{width:46px;height:46px;transform:rotate(-90deg)}
+.ringw em{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-size:11.5px;font-weight:600}
+@media(max-width:820px){.nx{grid-template-columns:minmax(0,1fr)}.nc{flex-direction:row;align-items:center}.nc .tile{width:72px;height:72px;flex:none}.nc .tile svg{width:38px;height:38px}}
+.days{margin:4px 0 10px 32px;border-left:2px solid var(--indS);padding-left:12px}
+.day{border-radius:12px;margin-bottom:6px}
+.day>summary{list-style:none;cursor:pointer}.day>summary::-webkit-details-marker{display:none}
+.dl{display:flex;gap:12px;align-items:center;min-height:42px;padding:4px 0}.dl>span:nth-child(2){flex:1}.chev{color:var(--mute);transition:transform .2s}.day[open] .chev{transform:rotate(90deg)}
+.day>summary small{color:var(--mute);font-size:12.5px;margin-left:4px}
+.day[open]{background:#f6f5fb;padding:2px 12px 10px}
+.dbody p{margin:.4em 0}.dbody ul{margin:.2em 0 .5em;padding-left:1.2em}.dbody li{margin:.2em 0}
+.donep{background:#e3f4ea;color:#1f5e3f;border-radius:10px;padding:8px 10px}
+@media(max-width:600px){.days{margin-left:6px}}
+.wrow{display:flex;align-items:flex-start;gap:10px}.wrow>label{flex:1}
+.dtog{flex:none;min-height:36px;padding:0 14px;border-radius:99px;background:var(--ind);color:#fff;font-size:13px;font-weight:600;margin-top:6px;box-shadow:0 4px 12px -4px rgba(123,92,229,.6)}
+.dtog span{display:inline-block;transition:transform .2s}.dtog.open{background:var(--cor)}.dtog.open span{transform:rotate(180deg)}
+.allbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--card);border-radius:16px;padding:12px 16px;margin-bottom:14px}
+.allbar span{flex:1 1 240px;color:var(--mute);font-size:13.5px}
+@media(max-width:600px){.wrow{flex-direction:column;gap:2px}.dtog{margin:0 0 6px 32px}}
+.dod{background:var(--corS);border-radius:12px;padding:10px 14px;margin:6px 0 12px;font-size:14px}
+.shipgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;margin-top:16px;align-items:start}
+.shipgrid .ship{margin-top:0}
+.ready{border-radius:14px;padding:14px 16px;background:var(--corS);border:2px solid #f3c58f;transition:background .3s,border-color .3s}
+.ready.go{background:#e3f4ea;border-color:#8fd0aa}
+.rdh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.rdp{font-weight:700;color:#a3600e;white-space:nowrap}.ready.go .rdp,.ready.go .rdh strong{color:#1f6b45}
+.rbar{height:8px;background:rgba(0,0,0,.07);border-radius:9px;overflow:hidden;margin:8px 0 10px}.rbar i{display:block;height:100%;width:0;background:var(--cor);transition:width .4s}.ready.go .rbar i{background:var(--ok)}
+.rdl{font-size:14px;margin:.3em 0}
+.ready label{min-height:36px;padding:5px 0;font-size:14px}
+@media(max-width:820px){.shipgrid{grid-template-columns:minmax(0,1fr)}}
+.rsum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+.rsum div{background:var(--indS);border-radius:14px;padding:12px 14px}.rsum b{display:block;font-size:22px;color:var(--ind)}.rsum small{color:var(--mute)}
+.rq{border:2px solid #f3c58f;background:linear-gradient(0deg,var(--card),var(--card))}.rq.go{border-color:#8fd0aa;background:#f3fbf6}
+.rqh{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.rqh h3{margin:0}
+.rqp{font-weight:700;color:#a3600e;white-space:nowrap}.rq.go .rqp{color:#1f6b45}.rq .rbar i{background:var(--cor)}.rq.go .rbar i{background:var(--ok)}
+.rchip{display:inline-block;background:var(--indS);color:var(--ind);border-radius:99px;padding:2px 10px;margin:2px 4px 2px 0;font-size:13px;font-weight:500}
+.ex{display:block;font-size:13.5px;margin:3px 0}
+.rqt td:nth-child(2){color:var(--mute);font-size:14px}
+@media(max-width:600px){.rsum{grid-template-columns:minmax(0,1fr)}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<div class="app"><div class="shell">
+
+<aside class="side" aria-label="Main">
+ <div class="logo"><i>AI</i>AI Journey</div>
+ <a href="#dashboard" data-v="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Dashboard</a>
+ <a href="#weeks" data-v="weeks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Week plan</a>
+ <a href="#jobs" data-v="jobs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>Jobs</a>
+ <a href="#prompts" data-v="prompts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H8l-4 4z"/></svg>Study prompts</a>
+ <a href="#readiness" data-v="readiness"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Job readiness</a>
+ <a href="#portfolio" data-v="portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>Portfolio</a>
+ <div class="upsell"><b>Next live session</b>Tomorrow 5:00am. Paste the "Live build" prompt into your project chat.</div>
+</aside>
+
+<main>
+ <div class="top"><h1 id="vtitle">Dashboard</h1>
+  <label class="search" style="padding:0;min-height:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q" type="search" placeholder="Search videos, weeks, jobs" aria-label="Search"></label>
+ </div>
+ <div id="results" class="card"></div>
+
+ <section class="view" id="v-dashboard">
+  <div class="banner">
+   <div><h2>Welcome back, Yonis!</h2><p id="welcome"></p></div>
+   <svg viewBox="0 0 220 130" aria-hidden="true">
+    <rect x="10" y="98" width="200" height="10" rx="4" fill="var(--ind)" opacity=".85"/>
+    <rect x="60" y="40" width="96" height="58" rx="7" fill="var(--card)" stroke="var(--ind)" stroke-width="4"/>
+    <g stroke-width="4" stroke-linecap="round"><line x1="72" y1="56" x2="102" y2="56" stroke="var(--cor)"/><line x1="80" y1="68" x2="130" y2="68" stroke="var(--blu)"/><line x1="80" y1="80" x2="116" y2="80" stroke="var(--ind)"/></g>
+    <rect x="166" y="66" width="28" height="32" rx="6" fill="var(--cor)"/><path d="M194 74 q12 2 8 14 q-2 5 -8 4" stroke="var(--cor)" stroke-width="4" fill="none"/>
+    <g class="steam" stroke="var(--mute)" stroke-width="3" fill="none" stroke-linecap="round"><path d="M174 58 q-4 -8 0 -16 q4 -8 0 -14"/><path d="M186 58 q-4 -8 0 -16 q4 -8 0 -14"/></g>
+    <rect x="22" y="74" width="22" height="24" rx="5" fill="var(--blu)"/><path d="M33 74 q-12 -18 -4 -34 M33 74 q4 -22 14 -28" stroke="var(--ok)" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M150 18 l3 7 l7 3 l-7 3 l-3 7 l-3 -7 l-7 -3 l7 -3z" fill="var(--ind)" opacity=".6"/>
+   </svg>
+  </div>
+  <div class="nx" id="nextCards"></div>
+  <div class="grid">
+   <div class="card"><h2>Study time this week</h2><div class="fig" id="chart"><svg id="chartsvg" role="img" aria-label="Minutes studied each day this week against a 60 minute target"></svg></div>
+    <div class="btns"><button class="pri" data-log="30">+30 min today</button><button data-log="15">+15</button><button data-log="60">+60</button><button data-log="0">Clear today</button></div></div>
+   <div class="card"><h2>This week's tasks</h2><div id="thisweek"></div></div>
+   <div class="card"><h2>Study streak</h2><div class="streak" id="streak"></div><p style="margin:14px 0 0;color:var(--mute)" id="streakTxt"></p></div>
+   <div class="card full"><h2>Up next to watch</h2><table class="stack"><thead><tr><th>Video or course</th><th>Length</th><th>Station</th></tr></thead><tbody id="nextVids"></tbody></table></div>
+   <div class="card full"><h2>Week 1, day 1 setup</h2><ul class="chk" id="todayList"></ul></div>
+  </div>
+ </section>
+
+ <section class="view" id="v-weeks"><div class="allbar"><span>Each week has a day-by-day plan; use the purple buttons to show or hide it. <strong>Rule from Stage 2:</strong> every project needs tests, a deploy and a data-protection note before it counts as done.</span><button type="button" class="pri" data-all="1">Expand all days</button><button type="button" data-all="0">Collapse all</button></div><div id="phaseList"></div></section>
+
+ <section class="view" id="v-jobs">
+  <div class="card"><h2>Job titles to search for</h2><p style="margin-top:-6px;color:var(--mute)">Green: apply after week 24. Amber: 12–18 months. Purple: the senior roles you saved. Generic "prompt engineer" and "chatbot developer" roles are left out on purpose: they are the most crowded.</p>
+   <table class="stack"><thead><tr><th>Job title</th><th>Level</th><th>Why it fits</th><th>Pay seen</th></tr></thead><tbody id="jobRows"></tbody></table>
+   <small style="color:var(--mute)">Pay figures are medians from ITJobsWatch adverts in 2026. A dash means not enough data.</small></div>
+  <div class="card" style="margin-top:18px"><h2>How to search</h2><ul><li><strong>Add your niche:</strong> include "NHS", "healthcare" or "public sector" in searches.</li><li><strong>Not London only:</strong> about half the UK's AI talent is in London, so competition there is fiercest. Also search Manchester, Leeds, Birmingham, Bristol and "remote".</li><li><strong>Use NHS Jobs:</strong> <a href="https://www.jobs.nhs.uk/" target="_blank" rel="noopener">jobs.nhs.uk</a>. Set alerts for digital, automation, RPA and informatics roles.</li><li><strong>Skip the junior queue:</strong> lead with shipped, tested, deployed projects and your inside-route pilot, not a "junior developer" label.</li></ul></div>
+  <div class="card" style="margin-top:18px"><h2>Inside route: an NHS automation pilot</h2><p style="margin-top:-6px;color:var(--mute)">Real workplace experience most career-switchers can't get. Only go ahead with your manager's and Information Governance's approval.</p><ul class="chk" id="insideList"></ul></div>
+  <div class="card" style="margin-top:18px"><h2>Saved roles</h2>
+   <div class="jd"><strong>Software AI Engineer:</strong> Financial Services, 2-month contract, hybrid, Inside IR35, rate DOE.<ul><li>Asks for: production Python, AI agents, MCP servers, RAG with source attribution, Databricks/Spark, MLOps, Copilot with human-in-the-loop, Kubernetes, CI/CD.</li><li>Gap: Financial Services experience (essential), Spark, Kubernetes, production support.</li></ul></div>
+   <div class="jd"><strong>AI Engineer – Copilot:</strong> Financial Services, 2-month contract, hybrid, Inside IR35, urgent.<ul><li>Asks for: Copilot / agent builds, ML in production, AWS, MLOps, RAG, Graph RAG, MCP, Databricks, Snowflake, Kubernetes, AI governance.</li><li>Gap: ML model deployment, AWS, Databricks, a Financial Services background.</li></ul></div>
+   <p>Both are senior contracts. Stations 2–5 cover the AI half; station 7 adds the enterprise half.</p></div>
+ </section>
+
+ <section class="view" id="v-readiness">
+  <div class="card" style="margin-bottom:16px"><h2>How job-ready you are, by skill</h2><p style="margin:0;color:var(--mute)">Each skill area turns green when you've finished its weeks and projects. The advised projects make you stand out for those roles; each has real examples to study. Search links open live GitHub or YouTube results.</p><div class="rsum" id="rsum"></div></div>
+  <div id="rqList"></div>
+ </section>
+ <section class="view" id="v-prompts"><div class="prompts" id="promptList"></div></section>
+
+ <section class="view" id="v-portfolio"><div class="card"><h2>Portfolio: six projects</h2><p style="margin-top:-6px;color:var(--mute)">Each one gets a GitHub repo, a 2-minute Loom demo and a one-page case study.</p>
+  <div class="dod"><strong>Definition of done:</strong> a project only counts when it has <b>tests</b>, is <b>deployed</b> and has a <b>data-protection note</b>. Tick all three, then tick Done.</div><table class="stack"><thead><tr><th>Project</th><th>Shows</th><th>Station</th><th>Tests</th><th>Deployed</th><th>Data note</th><th>Done</th></tr></thead><tbody id="projRows"></tbody></table>
+  <small style="color:var(--mute)">Use made-up data for anything health-related. Never use real patient information.</small></div>
+  <div class="card" style="margin-top:18px"><h2>What I need from you</h2><ul><li>Your AI assistant code: a GitHub link, or let me access its folder.</li><li>Your laptop: Windows or Mac, and what's already installed.</li><li>Your GitHub username. Never paste API keys into chat.</li><li>Your level from 1 to 5 in JavaScript, Python, APIs and Git.</li><li>Can you use Power Automate in your NHS Microsoft 365 account?</li></ul></div>
+ </section>
+</main>
+
+<aside class="right">
+ <div class="prof"><div class="av">Y</div><h3>Yonis</h3><small>AI Automation Developer<br>Healthcare &amp; regulated operations</small></div>
+ <div><div class="calh"><h2 style="margin:0" id="calT"></h2></div><div class="cal" id="cal"></div><small style="color:var(--mute);display:block;margin-top:10px">Dots mark days you logged study time.</small></div>
+ <div><h2>Station progress</h2><div id="stations"></div></div>
+ <div><h2>Upcoming milestones</h2><div id="milestones"></div></div>
+ <div class="bal"><small>TARGET DAY RATE</small><b>£500</b><span style="font-size:13px;opacity:.85">Power Automate contracts in England: £513 median</span></div>
+ <div><h2>Achievements</h2><div class="badges" id="badges"></div></div>
+</aside>
+
+</div></div>
+
+<script>
+{
+const KEY='aiRoadmap.v2',LOG='aiRoadmap.log';
+const load=k=>{try{return JSON.parse(localStorage.getItem(k)||'{}')}catch(e){return{}}};
+let state=load(KEY),log=load(LOG);
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state));localStorage.setItem(LOG,JSON.stringify(log))}catch(e){}};
+const yt=q=>'https://www.youtube.com/results?search_query='+encodeURIComponent(q);
+const ml=q=>'https://learn.microsoft.com/en-us/training/browse/?terms='+encodeURIComponent(q);
+const START=new Date(2026,10,23);
+const wkDate=n=>{const d=new Date(START);d.setDate(d.getDate()+(n-1)*7);return d};
+const fmt=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const dkey=d=>`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+
+const today=[['t1','Create or confirm your GitHub account'],['t2','Install VS Code, Node.js (LTS), Python 3 and Git'],['t3','Make a folder called ai-journey and run git init in it'],['t4','Watch the first 20 min of the JavaScript course, typing along'],['t5','Feynman loop: "What is a variable?" Explain it back to Claude'],['t6','Send me the items in "What I need from you"']];
+
+const P=[
+{n:"Foundations",s:1,goal:["Write basic JavaScript","Use Git and GitHub every session","Call an API and handle JSON","Run a small Node + Express server"],
+ weeks:["Set up tools. JS course part 1: variables, functions, if/else. First commit.","JS part 2: arrays, objects, loops. 10 small exercises in a GitHub repo.","Async, fetch, APIs and JSON. Git branches. Call a free public API.","Node + Express: two routes. Tidy up your AI assistant and write its README."],
+ ship:"Project 1: your AI assistant on GitHub with a README, screenshots and a demo.",
+ vids:[["Learn JavaScript: full course (freeCodeCamp)","https://www.youtube.com/watch?v=PkZNo7MFNFg","3.5 hrs"],["Git and GitHub crash course",yt("git and github crash course for beginners freecodecamp"),"~1 hr"],["Node.js + Express crash course",yt("node js express crash course"),"~1.5 hrs"],["CS50 shorts: API calls, JSON, debugging","https://cs50.harvard.edu/python/2022/shorts","10 min each"]]},
+{n:"Python + LLM APIs",s:5,goal:["Python basics (the senior jobs are Python-first)","Call Claude from code, get reliable JSON, use tool calling","Write tests with pytest and deploy to Azure from day one"],
+ weeks:["CS50P lectures 0–2. Start Claude 101 on Anthropic Academy.","CS50P lectures 3–4. Start \"Building with the Claude API\".","Prompts, system prompts, JSON output, and your first pytest tests.","Tool calling. Read \"Building effective agents\".","Referral triage tool: remove personal data, route referrals, test it, deploy it to Azure."],
+ ship:"Project 2: referral triage with personal-data removal, tests, Azure deploy and a data-protection note.",
+ vids:[["Harvard CS50P Python (lectures 0–4)","https://www.youtube.com/watch?v=nLRL_NcnK-4","~6 hrs"],["Anthropic Academy: Claude 101 + Claude API","https://anthropic.skilljar.com/","free"],["Anthropic: How to build effective AI agents","https://www.youtube.com/watch?v=LP5OCa20Zpg","18 min"],["Microsoft Learn: deploy a Python web app to Azure",ml("deploy python web app azure app service"),"free"]]},
+{n:"Automation",s:10,goal:["n8n workflows: triggers, webhooks, AI nodes","Power Automate (the Microsoft tool the NHS already has)","Human approval before anything is sent"],
+ weeks:["n8n beginner course, videos 1–5.","n8n videos 6–9 plus error handling. Power Automate basics on Microsoft Learn.","Build the patient enquiry triage bot: classify, draft, approve, log.","Oubah automations: order alerts, product copy, customer replies."],
+ ship:"Projects 3 and 4: patient enquiry triage bot and Oubah automations, each tested, deployed and documented.",
+ vids:[["n8n official beginner course (9 videos)","https://www.youtube.com/playlist?list=PLlET0GsrLUL59YbxstZE71WszP3pVnZfI","~2 hrs"],["freeCodeCamp: n8n production-grade AI agents","https://www.freecodecamp.org/news/learn-n8n-to-design-develop-and-deploy-production-grade-ai-agents/","4 hrs"],["freeCodeCamp: scalable AI automations with n8n","https://www.freecodecamp.org/news/create-scalable-ai-automations-with-n8n/","1 hr"],["Microsoft Learn: Power Automate",ml("power automate"),"free"]]},
+{n:"Data + RAG + MCP",s:14,goal:["SQL and cleaning messy Excel/CSV exports (the real-world data problem)","RAG chatbots that cite their sources","An MCP server that connects AI to a database"],
+ weeks:["SQL and messy data: queries, joins, cleaning Excel/CSV exports with pandas.","Embeddings and RAG from scratch in Python, with citations.","Introduction to MCP. Build an MCP server over your database.","Trust policy Q&A: answers from public NHS policies with citations, tested and deployed."],
+ ship:"Project 5: trust policy Q&A with citations, tests, Azure deploy and a data-protection note.",
+ vids:[["SQL full course",yt("sql full course for beginners freecodecamp"),"~4 hrs"],["pandas for beginners: reading Excel and CSV",yt("pandas tutorial read excel csv clean data beginners"),"~1 hr"],["Learn RAG from scratch: Python","https://www.youtube.com/watch?v=sVcwVQRHIc8","2.5 hrs"],["RAG and MCP fundamentals crash course","https://www.freecodecamp.org/news/learn-rag-and-mcp-fundamentals/","2 hrs"],["Anthropic Academy: Introduction to MCP","https://anthropic.skilljar.com/","1–2 hrs"]]},
+{n:"Agents + governance",s:18,goal:["Multi-tool agents with human approval","Evals, Docker, CI/CD and logging","UK GDPR, DPIAs, prompt injection and NHS clinical safety basics"],
+ weeks:["Design and build the waiting-list agent: 3 tools, step and spend limits.","Evals: 10 test cases. Approve-before-send step.","Docker, GitHub Actions and logging. Azure Fundamentals.","Governance and security: UK GDPR, DPIA, prompt injection, shadow AI, NHS clinical safety.","Ship the waiting-list agent with a governance section in its case study."],
+ ship:"Project 6: waiting-list admin agent with evals, approval, Docker, CI and a mini DPIA.",
+ vids:[["How we build effective agents (Anthropic)",yt("How We Build Effective Agents Barry Zhang Anthropic"),"15 min"],["Docker for beginners",yt("docker tutorial for beginners freecodecamp"),"~2 hrs"],["ICO: AI and data protection guidance","https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/artificial-intelligence/","read"],["OWASP Top 10 for LLM applications",yt("OWASP top 10 for LLM applications explained"),"~30 min"]]},
+{n:"Ship + sell",s:23,goal:["Lead with your niche: AI automation for healthcare and regulated operations","Portfolio site, Looms and CV that prove you ship","Apply regionally and remotely, not London only"],
+ weeks:["Portfolio site, case studies, Loom demos, CV and LinkedIn with your niche.","Upwork and Malt profiles, 5 pitches, 5 applications, mock interview."],
+ ship:"Live portfolio site, 6 case studies, and your first pitches and applications sent.",
+ vids:[["Build a developer portfolio",yt("build developer portfolio website tutorial"),"~1 hr"],["Upwork tips for new AI freelancers",yt("upwork profile tips AI automation freelancer"),"varies"],["NHS Jobs: search digital and automation roles","https://www.jobs.nhs.uk/","search"]]},
+{n:"Enterprise track",s:25,span:2,goal:["Optional: what the senior roles ask for","Copilot Studio, Azure AI Search, AWS","Databricks/Spark, Kubernetes and monitoring, Graph RAG"],
+ weeks:["Copilot Studio: build an internal helpdesk agent. Power Platform fundamentals.","Azure AI Search + Azure OpenAI: enterprise-grade RAG.","AWS basics (many finance roles use AWS): deploy one project.","Databricks Free Edition: a small Spark pipeline that feeds a RAG bot.","Kubernetes basics. Monitoring for LLM apps.","Graph RAG experiment. Regulated-environment case study from your NHS experience."],
+ ship:"An enterprise-style project: agent + data pipeline + monitoring, written up for regulated industries.",
+ vids:[["Microsoft Learn: Copilot Studio",ml("copilot studio"),"free"],["Microsoft Learn: Azure AI Search",ml("azure ai search"),"free"],["Databricks / Apache Spark for beginners",yt("databricks apache spark tutorial for beginners"),"varies"],["Kubernetes for beginners",yt("kubernetes tutorial for beginners"),"~3 hrs"]]}
+];
+P.forEach(p=>{const sp=p.span||1;p.wk=p.weeks.map((t,j)=>({t,from:p.s+j*sp,to:p.s+j*sp+sp-1}));p.e=p.wk[p.wk.length-1].to});
+const wlabel=w=>w.from===w.to?`Week ${w.from}`:`Weeks ${w.from}–${w.to}`;
+
+const jobs=[['AI Automation Developer (healthcare)','t1','Your niche: automation + AI in a regulated setting','£42.5k perm (Automation Developer)'],['Power Automate / Power Platform Developer','t1','Huge UK demand; the NHS already runs Microsoft 365','£513/day'],['Digital Transformation / Automation Analyst (NHS)','t1','Your pathway experience + automation skills; check NHS Jobs',''],['RPA Developer (NHS / healthcare)','t1','Admin automation at scale inside trusts',''],['Workflow Automation Engineer (n8n / Make)','t1','Projects 3–4 prove it','£73.8k perm (small sample)'],['AI Governance Analyst','t2','Station 5 governance pack + NHS IG experience',''],['Clinical Systems / Digital Developer','t2','Healthcare systems + integration skills',''],['Copilot Studio Developer','t2','After the enterprise track','£525/day'],['Python Developer – AI & Workflow Automation','t2','Python + automation + LLMs',''],['Software AI Engineer / AI Engineer – Copilot','t3','The roles you saved: production + Financial Services','']];
+const tierName={t1:'Week 24',t2:'12–18 months',t3:'2+ years'};
+
+const prompts=[['Learning ladder','When starting a new topic',`I'm learning TOPIC to become an AI automation developer for healthcare and regulated operations. I already know WHAT I KNOW.
+Build a 5-level ladder from beginner to practitioner. For each level: what I can do at the end, one hands-on exercise I build live in VS Code, and 3 self-check questions.
+Show Level 1 only, then wait for my code.`],['Feynman loop','After every video chunk',`Explain CONCEPT simply, using an analogy from NHS patient pathways or Uber driving.
+Then ask me to explain it back. Score me out of 10, name the exact gap, re-teach only that gap, and ask again until I score 9+.`],['Quiz me until I break','Sundays',`Quiz me on TOPIC. One question at a time, getting harder: concepts, "what does this code output?" and "find the bug".
+After each answer: score out of 10, why, and where my reasoning went wrong. Stop when I miss 2 in a row, then list my weak spots.`],['One-page cheat sheet','End of each week',`Make a one-page cheat sheet on TOPIC: core definitions, one diagram or mental model, 3 real automation examples, common mistakes, and 5 self-test questions with answers at the bottom.`],['Live build','Every hands-on session',`Let's build FEATURE live. Don't write it all for me.
+Give me the next small step only. I'll type it, run it, and paste back my code and any error. Review it, explain what happened, then give the next step.
+If I'm stuck twice, give a hint; if still stuck, show the answer and explain it.`]];
+const projects=[['AI personal assistant','Node, Express, Claude API, memory, UI',1],['Referral triage tool','Personal-data removal, routing, pytest, Azure',2],['Patient enquiry triage bot','n8n, redaction, AI drafts, human approval',3],['Oubah automations','Real business: orders, product copy, replies',3],['Trust policy Q&A','SQL + RAG with citations, MCP, Azure',4],['Waiting-list admin agent','Agent, evals, Docker, CI, DPIA, hazard log',5]];
+const inside=[['ir0','Week 11: ask IT / Information Governance whether you can use Power Automate in your NHS account'],['ir1','Week 13: list 3 manual admin tasks in your team that eat time (describe them without patient data)'],['ir2','Week 17: write a one-page pilot proposal: the problem, hours saved, data involved, risks'],['ir3','Week 19: share it with your manager and the IG lead'],['ir4','Week 22: run the pilot only once approved, with approved data and tools'],['ir5','Week 24: write it up as a case study for your CV (no patient data)']];
+
+const box=(id,t)=>`<label class="${state[id]?'on':''}"><input type="checkbox" data-id="${id}" ${state[id]?'checked':''}><span>${t}</span></label>`;
+const JS='https://www.youtube.com/watch?v=PkZNo7MFNFg';
+const DAYS={'0_0':[
+ {d:'Mon',t:'Set up your desk',m:'45 min',watch:['Terminal basics for beginners',"https://www.youtube.com/results?search_query=terminal+command+line+basics+for+beginners"],
+  obj:['Know what the terminal is: a way to give your computer typed instructions','Learn 4 commands: pwd (where am I), ls / dir (what is here), mkdir (make folder), cd (go into folder)','Install VS Code, Node.js (LTS), Git; check with node -v and git --version'],
+  build:'Make a folder called ai-journey, create hello.js with console.log("Hello Yonis") and run it with: node hello.js',
+  done:'Your terminal prints Hello Yonis.'},
+ {d:'Tue',t:'Variables and numbers',m:'60 min',watch:['JS course: chapters from the start to "Add Two Numbers" (~20 min)',JS],
+  obj:['Pause after every chapter and type the example yourself in VS Code; never copy and paste','Understand: comments, what a variable is, let vs const, = (assignment), + − × ÷','Before you run each line, guess the output out loud, then check','Write one question in a notes.md file for anything that confuses you'],
+  build:'Tip calculator: bill and tip % in variables → print the tip and the total.',
+  done:'You can change the bill and the total updates, and you score 9+ explaining "variable" in the Feynman loop.'},
+ {d:'Wed',t:'Strings',m:'60 min',watch:['JS course: the string chapters, "Declare String Variables" to "Find the Length of a String" (~20 min)',JS],
+  obj:['Understand: quotes, joining strings with +, template literals with ${ }, .length','Try every example with your own words, such as your name or an Uber pickup point','Break it on purpose: delete a quote, run it, read the error message, then fix it'],
+  build:'Uber trip receipt: pickup, drop-off, fare and tip printed as a neat receipt using a template literal.',
+  done:'The receipt prints correctly and you can explain the error you caused.'},
+ {d:'Thu',t:'Arrays and functions',m:'60 min',watch:['JS course: "Store Multiple Values with Arrays" to "Return a Value from a Function" (~25 min)',JS],
+  obj:['Understand: arrays [ ], index starting at 0, push and pop, functions with inputs (parameters) and return','Predict the output before running each example','Rewrite one example using NHS or Uber data instead of the course data'],
+  build:'Weekly earnings: an array of fares → a function that returns the total and the average.',
+  done:'Your function gives the right answer for any list of fares you give it.'},
+ {d:'Fri',t:'Rest or catch-up',m:'15 min',watch:['No new video',''],
+  obj:['Optional: redo one build from memory without looking'],build:'Nothing new. Rest is part of the plan.',done:'You feel ready for Saturday.'},
+ {d:'Sat',t:'If/else + Git (live with Claude)',m:'2 hrs',watch:['JS course: "Use Conditional Logic with If Statements" to the else if chapters (~25 min), then a Git basics video',JS],
+  obj:['Understand: true/false, comparison operators (===, >, <), if / else if / else','Git: init, add, commit, push; what a commit is and why you write a message','Paste the Live build prompt and build it step by step with me'],
+  build:'Shift summary: given fares and hours, print "Bonus day!" if over £200, otherwise how much is left. Then upload all of this week\'s files to a GitHub repo called ai-journey with a README.',
+  done:'Your GitHub repo shows 4 small programs and a README.'},
+ {d:'Sun',t:'Review',m:'30 min',watch:['No new video',''],
+  obj:['Run "Quiz me until I break" on: variables, strings, arrays, functions, if/else','Ask for the one-page cheat sheet and save it as week1-notes.md in your repo'],
+  build:'Cheat sheet committed to GitHub.',done:'You score 7/10 or more before you miss two in a row.'}
+]};
+
+const Y=q=>"https://www.youtube.com/results?search_query="+encodeURIComponent(q);
+const M=q=>"https://learn.microsoft.com/en-us/training/browse/?terms="+encodeURIComponent(q);
+const L={JS:"https://www.youtube.com/watch?v=PkZNo7MFNFg",PY:"https://www.youtube.com/watch?v=nLRL_NcnK-4",ACAD:"https://anthropic.skilljar.com/",AGV:"https://www.youtube.com/watch?v=LP5OCa20Zpg",BEA:"https://www.anthropic.com/engineering/building-effective-agents",N8N:"https://www.youtube.com/playlist?list=PLlET0GsrLUL59YbxstZE71WszP3pVnZfI",N8A:"https://www.freecodecamp.org/news/create-scalable-ai-automations-with-n8n/",N8P:"https://www.freecodecamp.org/news/learn-n8n-to-design-develop-and-deploy-production-grade-ai-agents/",RJS:"https://www.freecodecamp.org/news/build-your-own-rag-chatbot-with-javascript/",RPY:"https://www.youtube.com/watch?v=sVcwVQRHIc8",MCP:"https://www.freecodecamp.org/news/learn-rag-and-mcp-fundamentals/",ICO:"https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/artificial-intelligence/",FCC:"https://www.freecodecamp.org/learn",NHS:"https://www.jobs.nhs.uk/"};
+/* key: station_week -> [ 4 weekday sessions [title, [watch,link], [objectives], build, done], saturday [title,[objectives],build,done], sunday topics ] */
+const SPEC={
+"0_1":[[["Objects",["JS course: the object chapters (\"Build JavaScript Objects\" onwards)",L.JS],["Understand key: value pairs","Read values with dot and bracket notation","Add, update and delete properties"],"A fake patient appointment object: name, clinic, date, status. Print a one-line summary.","You can explain when to use an object instead of an array."],
+ ["Loops",["JS course: \"Iterate with For Loops\" and \"While Loops\"",L.JS],["Understand for, while and for...of","Trace each loop on paper before running it","Spot an infinite loop and stop it with Ctrl+C"],"Loop through a list of fares and print each one with a running total.","You can write a for loop without looking."],
+ ["Arrays of objects + map / filter",["JavaScript map, filter and reduce explained",Y("javascript map filter reduce explained")],["Store a list of objects in an array","Use filter to pick items and map to change them","Know what reduce does (total of a list)"],"Fake Oubah orders: list orders over £100 and total them.","You can filter any list by a rule you choose."],
+ ["Practice exercises",["freeCodeCamp JavaScript curriculum (interactive)",L.FCC],["Do 5 small exercises without video","Read every error message before asking for help","Commit after each exercise"],"5 exercises saved in your repo.","5 commits on GitHub today."]],
+ ["Shift log (live with Claude)",["Use the Live build prompt","Combine objects, arrays, loops and filter"],"Shift log: an array of shift objects (day, hours, fares) → total, best day, hourly rate.","Your repo has 10 small exercises and the shift log."],"objects, loops, map, filter"],
+"0_2":[[["What is an API and JSON",["What is an API? Explained simply",Y("what is an API explained simply")],["An API is a waiter between your code and a service","JSON is how the data is written: keys and values","Read a JSON file and pull out one value"],"Read fares.json in Node and print the total.","You can explain an API using a restaurant analogy."],
+ ["Async and await",["JavaScript async/await tutorial",Y("javascript async await tutorial for beginners")],["Why some code has to wait (network, files)","Promises in one sentence","Write async functions and use await"],"A fake slow function that waits 2 seconds, then prints a message.","You can explain why await is needed."],
+ ["Fetch a real API",["Fetch API tutorial",Y("javascript fetch api tutorial")],["Use fetch with the free Open-Meteo weather API (no key needed)","Handle errors with try/catch","Print only the fields you need"],"Get today's weather for Harrow and print it.","Your script prints real live data."],
+ ["Git branches",["Git branching for beginners",Y("git branching tutorial for beginners")],["Make a branch, change code, merge it back","Know why branches keep the main version safe"],"Add a feature on a branch and merge it.","Your GitHub shows the merged branch."]],
+ ["Shift weather check (live)",["Combine fetch + if/else + functions"],"Fetch the forecast for Harrow: rain or cold means surge likely, so suggest your best hours.","Pushed with a README explaining how to run it."],"APIs, JSON, async/await, fetch, branches"],
+"0_3":[[["Node modules and npm",["Node.js crash course: modules and npm",Y("node js crash course")],["What package.json is","npm init and npm install","Import a package and use it"],"A project that uses one npm package (e.g. dayjs for dates).","You can explain what node_modules is and why it's not committed."],
+ ["Express routes",["Express crash course",Y("express js crash course")],["What a server and a route are","GET routes that return JSON","Test routes in the browser"],"Routes /hello and /fares returning JSON.","You can add a new route by yourself."],
+ ["Secrets and .env",["dotenv tutorial",Y("dotenv node js tutorial")],["Never commit API keys","Put keys in .env and add .env to .gitignore","Read process.env in code"],"Move your AI assistant's API key into .env.","A search of your repo finds no keys."],
+ ["Writing a README",["How to write a good README",Y("how to write a good readme github")],["What it does, how to run it, screenshots","Write for a client, not for yourself"],"README draft for your AI assistant.","A friend could run it from your README."]],
+ ["Ship Project 1 (live)",["Review your AI assistant code with Claude","Tidy it, comment it, take screenshots"],"Project 1: your AI assistant, public on GitHub with README and screenshots.","The repo looks professional enough to show a client."],"Node, npm, Express, .env, README"],
+"1_0":[[["Python basics",["CS50P lecture 0: functions and variables",L.PY],["Python is like JS without semicolons and braces","print, input, variables, f-strings","Type every example yourself"],"Tip calculator in Python. Compare it with your JS version.","You can name 3 differences between Python and JS."],
+ ["Conditionals",["CS50P lecture 1: conditionals",L.PY],["if, elif, else and indentation","Comparison and logic (and, or, not)"],"Shift bonus checker in Python.","You can rewrite any if/else from JS in Python."],
+ ["Loops",["CS50P lecture 2: loops",L.PY],["for, while, range, lists and dictionaries","Loop over a list of dictionaries"],"Fares loop with total and average.","You can loop over any list without help."],
+ ["Claude 101",["Anthropic Academy: Claude 101",L.ACAD],["Tokens, context window, what a prompt is","Strengths and limits of LLMs","Take notes in your own words"],"Notes file: 10 things you learned.","You complete the course quiz."]],
+ ["Port to Python (live)",["Rewrite Week 1–2 programs in Python"],"A /python folder with 4 of your JS programs rewritten.","All 4 run with python file.py."],"Python basics compared with JS"],
+"1_1":[[["Exceptions",["CS50P lecture 3: exceptions",L.PY],["try / except, and why programs crash","Validate user input"],"Fare input that won't crash on bad input.","Typing letters instead of numbers doesn't crash it."],
+ ["Libraries and pip",["CS50P lecture 4: libraries",L.PY],["import, pip install, virtual environments","The requests library"],"Fetch Harrow weather in Python.","Same result as your JS version."],
+ ["First Claude API call",["Anthropic Academy: Building with the Claude API (start)",L.ACAD],["API key in .env, the anthropic package","messages, model, max_tokens","Read the response object"],"hello_claude.py that asks Claude a question.","You get a reply in your terminal."],
+ ["Multi-turn conversations",["Claude API course: conversations section",L.ACAD],["The messages list holds the history","user and assistant roles"],"A CLI chat that remembers what you said.","It remembers your name 3 messages later."]],
+ ["CLI chatbot (live)",["Add a system prompt and an exit command"],"A Python chatbot in the terminal with history.","Pushed with a README."],"exceptions, pip, Claude API basics"],
+"1_2":[[["System prompts",["Claude API course: system prompts",L.ACAD],["What a system prompt controls","Give a role, rules and a tone"],"An NHS admin helper bot (fake data only).","It stays in role when you try to distract it."],
+ ["Prompt techniques",["Prompt engineering tutorial",Y("anthropic prompt engineering tutorial")],["Clear instructions, examples, XML tags","Compare 3 versions of one prompt"],"A prompts.md file with your best patterns.","You can explain why your best prompt won."],
+ ["JSON output",["Claude API course: structured output",L.ACAD],["Ask for an exact JSON shape","Give one example of the output"],"Extract name, date and request type from a fake email as JSON.","Valid JSON 10 times in a row."],
+ ["Validate + first tests",["pytest for beginners",Y("pytest tutorial for beginners")],["json.loads with try/except and a retry","Write tests with pytest: what goes in, what should come out"],"A safe parse function with 3 pytest tests.","pytest shows 3 green passes."]],
+ ["Email to JSON (live)",["Run it on 10 fake emails","Add tests for the tricky ones"],"An extractor that saves all 10 results to JSON, with tests.","10 out of 10 parsed and tests pass."],"system prompts, prompt techniques, JSON, pytest"],
+"1_3":[[["Workflows vs agents",["Anthropic: How to build effective AI agents",L.AGV],["A workflow follows set steps; an agent decides its own steps","When NOT to use an agent"],"A notes.md summary in your own words.","Feynman score 9+ on \"what is an agent?\""],
+ ["Agent patterns",["Read: Building effective agents",L.BEA],["Prompt chaining, routing, parallelisation","Orchestrator-workers, evaluator-optimiser"],"Draw the 5 patterns in Excalidraw.","You can match each pattern to a real business task."],
+ ["Tool calling",["Claude API course: tool use",L.ACAD],["How Claude asks to call a tool","You run the tool and send the result back"],"A get_weather tool Claude can call.","Claude answers \"Should I drive tonight?\" using your tool."],
+ ["Two tools",["Claude API course: multiple tools",L.ACAD],["Tool descriptions matter","Claude chooses the right tool"],"Add a calculator tool alongside weather.","It picks the correct tool every time."]],
+ ["Tool-using assistant (live)",["Combine tools + conversation history"],"An assistant that chooses between 2 tools.","Pushed, with a diagram in the README."],"tool calling, agent patterns"],
+"1_4":[[["Plan the referral triage tool",["No new video",""],["Write 10 made-up referral letters (never real ones)","Route to admin categories only (clinic, missing info, duplicate, other); never make clinical decisions"],"referrals.json and a one-page spec.","The spec says clearly what the tool must never do."],
+ ["Remove personal data first",["Removing personal data (PII) in Python",Y("python remove PII redaction tutorial")],["Strip names, NHS-number-style numbers, dates of birth and phone numbers BEFORE text goes to the AI","Test that nothing slips through"],"A redact() function with pytest tests.","Every fake identifier is removed in your tests."],
+ ["Route and test",["No new video",""],["Classify the redacted text, then save a reason","Tests for each category"],"Routing results saved to CSV.","9 out of 10 routed correctly, tests green."],
+ ["Deploy to Azure",["Microsoft Learn: deploy a Python web app to Azure",M("deploy python web app azure app service")],["Azure free account, App Service, environment variables for keys"],"Your tool live on Azure with a simple form.","A public URL works (with fake data only)."]],
+ ["Ship Project 2 (live)",["Write the data-protection note: what data, where it goes, what is removed","Record a 2-minute Loom"],"Project 2: referral triage with tests, Azure deploy, data note and Loom.","All 3 production boxes ticked on the Portfolio page."],"Station 2 review: Python, API, prompts, tools, tests, PII"],
+"2_0":[[["Intro to automation",["n8n beginner course 1/9",L.N8N],["Triggers, actions and workflows","Sign up for the n8n Cloud free trial"],"Your first workflow: manual trigger → set → output.","It runs green."],
+ ["APIs and webhooks",["n8n beginner course 2/9",L.N8N],["A webhook is a URL that starts a workflow","Connect this to your API week"],"A webhook that receives data.","You trigger it from your browser."],
+ ["Nodes",["n8n beginner course 3/9",L.N8N],["Core nodes: IF, Set, HTTP Request"],"Workflow: HTTP request → IF → two branches.","Both branches work."],
+ ["Data and core concepts",["n8n beginner course 4–5/9",L.N8N],["Items, JSON in n8n, expressions"],"Use an expression to build a message.","You can read the data between nodes."]],
+ ["Gmail → Sheets (live)",["Connect Gmail and Google Sheets"],"New email with a keyword → logged as a row in a Sheet.","It works on a real test email."],"triggers, nodes, items, expressions"],
+"2_1":[[["Useful nodes",["n8n beginner course 6/9",L.N8N],["Schedule, Merge, Code node"],"A scheduled daily summary.","It runs on schedule."],
+ ["Error handling and debugging",["n8n beginner course 7–8/9",L.N8N],["Error workflows, retries","Pin data to test"],"An error workflow that emails you.","Break it on purpose and you get the alert."],
+ ["Power Automate basics",["Microsoft Learn: Power Automate",M("power automate")],["Cloud flows, triggers, connectors","The Microsoft version of n8n"],"A flow: Microsoft Form response → email.","It runs (try it in your work account if you're allowed)."],
+ ["AI in n8n",["freeCodeCamp: scalable AI automations with n8n",L.N8A],["The AI agent node, memory, tools"],"Summarise an incoming email with AI.","The summary appears in your Sheet."]],
+ ["Error-proof AI flow (live)",["Add AI + error handling to the Gmail flow"],"Gmail → AI summary → Sheet, with error alerts.","Runs on 5 test emails."],"error handling, Power Automate, AI nodes"],
+"2_2":[[["Design the patient enquiry bot",["No new video",""],["Draw the flow in Excalidraw","Admin categories: booking, cancellation, question, other"],"A flow diagram and a fake enquiry form.","Fits one screen."],
+ ["Trigger, redact, classify",["No new video",""],["Form or email trigger → remove personal data → AI classify"],"Every enquiry gets a category.","20 fake enquiries classified."],
+ ["Draft reply and log",["No new video",""],["AI drafts a reply","Log to Sheets or SharePoint"],"Drafts saved next to each enquiry.","The drafts read like a human wrote them."],
+ ["Human approval",["n8n: wait / approval step",Y("n8n human in the loop approval")],["Nothing is sent without a click"],"An approval step before sending.","Rejected drafts are never sent."]],
+ ["Ship Project 3 (live)",["Test with 20 enquiries, write the data note, record a Loom"],"Project 3: patient enquiry triage bot, tested and documented.","Shipped."],"workflow design, approval steps, redaction"],
+"2_3":[[["Pick Oubah tasks",["No new video",""],["List repetitive tasks","Pick 3 that save the most time"],"A task list with time saved per week.","3 tasks chosen."],
+ ["Order alerts",["No new video",""],["New order → notification + Sheet row"],"An order alert workflow.","A test order is logged."],
+ ["Product descriptions",["No new video",""],["Bullet points in → polished description out","Keep the Oubah brand voice"],"A description generator.","3 descriptions you'd actually publish."],
+ ["Customer replies",["No new video",""],["FAQ-based draft replies with approval"],"A reply drafter.","Drafts are accurate to your policies."]],
+ ["Ship Project 4 (live)",["Connect to your store platform, record a Loom"],"Project 4: Oubah automations with time saved.","Real business, real results."],"Station 3 review: automation"],
+"3_0":[[["SQL basics",["SQL full course",Y("sql full course for beginners freecodecamp")],["SELECT, WHERE, ORDER BY","Tables, rows, columns"],"10 queries on a sample database.","10 queries written and working."],
+ ["Joins and summaries",["SQL joins and GROUP BY",Y("sql joins and group by explained")],["INNER and LEFT JOIN","COUNT, SUM, AVG, GROUP BY"],"Join appointments to clinics and count per clinic.","Your numbers match a manual check."],
+ ["Messy Excel and CSV",["pandas: reading and cleaning Excel/CSV",Y("pandas tutorial read excel csv clean data beginners")],["Read an Excel export","Fix blank cells, odd date formats, duplicates"],"Clean a deliberately messy fake waiting-list export.","No blanks or duplicates left."],
+ ["Microsoft data sources",["Power Automate: Excel and SharePoint connectors",Y("power automate excel sharepoint list tutorial")],["Read and write SharePoint lists and Excel tables"],"A flow that copies new Excel rows into a SharePoint list.","It runs on test data."]],
+ ["Messy data to database (live)",["Load the cleaned export into SQLite","Query it from Python"],"A waiting-list database you can query (fake data).","You answer 5 questions with SQL."],"SQL, joins, pandas cleaning, Microsoft connectors"],
+"3_1":[[["Embeddings",["Embeddings explained simply",Y("embeddings explained simply")],["Text becomes numbers that capture meaning"],"Notes and a Feynman check.","Score 9+ on \"what is an embedding?\""],
+ ["Indexing",["Learn RAG from scratch (Python): overview and indexing",L.RPY],["Load, split (chunk), embed, store"],"An indexed document folder.","The index builds without errors."],
+ ["Retrieval and generation",["RAG from scratch: retrieval and generation",L.RPY],["Top-k results","Answer only from retrieved text; say \"I don't know\""],"Grounded answers.","It refuses questions it can't answer."],
+ ["Better retrieval",["RAG from scratch: query translation",L.RPY],["Chunk size, overlap, rewriting vague questions"],"Compare 2 chunk sizes.","You can explain which worked better."]],
+ ["Citations (live)",["Show the source for every answer"],"Every answer ends with [source: file, section].","10 out of 10 cite correctly."],"embeddings, RAG pipeline, citations"],
+"3_2":[[["What MCP is",["Anthropic Academy: Introduction to MCP",L.ACAD],["Servers, tools, resources, prompts"],"Notes and a diagram.","You can explain MCP in 2 sentences."],
+ ["MCP crash course",["RAG and MCP fundamentals crash course",L.MCP],["The Python MCP SDK","Server vs client"],"Code along with the first half.","The example server runs."],
+ ["MCP over a database",["Continue the crash course",L.MCP],["Expose read-only SQL queries as tools"],"An MCP server over your waiting-list database.","It lists its tools when tested."],
+ ["Connect to Claude",["Connect a local MCP server to Claude Desktop",Y("connect mcp server claude desktop")],["Config file, restart, test"],"Claude answers questions from your database.","Correct answers to 3 questions."]],
+ ["Integration demo (live)",["Ask Claude questions across your database through MCP"],"An MCP server with tests and a README.","Pushed to GitHub."],"MCP, integration with databases"],
+"3_3":[[["Pick the documents",["No new video",""],["Use public NHS trust policies (published online), never internal or patient documents"],"A docs folder and 15 test questions.","Questions written down."],
+ ["Ingest",["No new video",""],["Chunk, embed, store"],"An indexed policy set.","Retrieval finds the right sections."],
+ ["Answers, citations and tests",["No new video",""],["Grounded answers, citations, \"I don't know\"","pytest checks for 5 key questions"],"A working Q&A with tests.","13 of 15 right, tests green."],
+ ["Deploy to Azure",["Microsoft Learn: deploy to Azure",M("deploy python web app azure app service")],["A simple web page on Azure"],"Live on Azure.","Someone else can use it."]],
+ ["Ship Project 5 (live)",["Data-protection note, Loom, case study"],"Project 5: trust policy Q&A with citations.","All 3 production boxes ticked."],"Station 4 review: data, RAG, MCP"],
+"4_0":[[["How agents work",["How we build effective agents (Anthropic)",Y("How We Build Effective Agents Barry Zhang Anthropic")],["Keep it simple","Think like your agent"],"Notes: 3 principles in your words.","Feynman 9+."],
+ ["Design the waiting-list agent",["No new video",""],["Goal: find fake patients near a waiting-time breach and draft chaser letters","Tools: query the database, calculate dates, draft a letter"],"A design doc and diagram.","Fits one page."],
+ ["Build the loop",["No new video",""],["Call model → run tool → feed result back → repeat"],"A working agent loop.","It completes the task on fake data."],
+ ["Limits",["No new video",""],["Max steps, spend cap, timeouts"],"Safety limits added.","It stops itself at the limit."]],
+ ["3-tool agent (live)",["Test on 5 scenarios"],"A waiting-list agent that drafts letters.","4 of 5 scenarios handled well."],"agent loop, tools, limits"],
+"4_1":[[["What evals are",["How to evaluate LLM apps",Y("how to evaluate llm applications evals tutorial")],["Test cases with expected results","Automatic vs human scoring"],"Notes on eval types.","You can explain why evals matter."],
+ ["Write test cases",["No new video",""],["10 inputs + what good looks like, including 3 edge cases"],"evals.json with 10 cases.","Edge cases included."],
+ ["Auto-score",["No new video",""],["A script runs all cases and scores them"],"A pass/fail report.","One command runs everything."],
+ ["Human in the loop",["No new video",""],["Approve before anything is sent"],"An approval step in the agent.","Nothing is sent without approval."]],
+ ["Improve to pass (live)",["Fix failures one at a time"],"8 of 10 evals passing.","Before/after scores in the README."],"evals, human-in-the-loop"],
+"4_2":[[["Docker (part 1)",["Docker tutorial for beginners",Y("docker tutorial for beginners freecodecamp")],["Images, containers, Dockerfile"],"Run hello-world in Docker.","You can explain image vs container."],
+ ["Docker (part 2)",["Docker tutorial (continued)",Y("docker tutorial for beginners freecodecamp")],["Containerise your agent"],"The agent running in a container.","docker run works first time."],
+ ["GitHub Actions",["GitHub Actions for beginners",Y("github actions tutorial beginners")],["Run tests and evals on every push"],"CI that runs your tests.","Green tick on GitHub."],
+ ["Azure Fundamentals + logging",["Microsoft Learn: Azure Fundamentals",M("azure fundamentals")],["Core Azure services, identity, cost","Log every agent step and its cost"],"Logs for every run, plus Azure notes.","You can explain where your app runs and what it costs."]],
+ ["Production-ready (live)",["Docker + CI + logs together"],"A containerised agent with CI.","Green CI badge in the README."],"Docker, CI/CD, logging, Azure"],
+"4_3":[[["UK GDPR and AI",["ICO: AI and data protection guidance",L.ICO],["Lawful basis, data minimisation, transparency","What counts as special category (health) data"],"Notes in your own words.","You can explain data minimisation with an example."],
+ ["DPIA basics",["ICO: data protection impact assessments explained",Y("ICO DPIA data protection impact assessment explained")],["When a DPIA is needed","Risks, mitigations, sign-off"],"A mini DPIA for your waiting-list agent.","It names every data flow."],
+ ["Prompt injection and shadow AI",["OWASP Top 10 for LLM applications",Y("OWASP top 10 for LLM applications explained")],["How hidden instructions in text can hijack an AI","Shadow AI: staff pasting data into unapproved tools"],"Test your agent with 3 injection attempts and add defences.","All 3 attempts fail."],
+ ["NHS clinical safety",["DCB0129 / DCB0160 clinical safety explained",Y("DCB0129 DCB0160 clinical safety explained")],["What a hazard log and a Clinical Safety Officer are","Why admin tools must still avoid clinical decisions"],"A short hazard log for your agent.","5 hazards with mitigations."]],
+ ["Governance pack (live)",["Review your DPIA, hazard log and defences with Claude"],"A governance folder in your repo: DPIA, hazard log, threat notes.","You could explain it to an IG lead."],"GDPR, DPIA, prompt injection, clinical safety"],
+"4_4":[[["End-to-end test",["No new video",""],["Run the full flow on fresh fake data"],"A test report.","No failures."],
+ ["Deploy to Azure",["Microsoft Learn: deploy containers to Azure",M("azure container apps")],["Deploy the container"],"The agent live on Azure.","It runs on a schedule."],
+ ["Monitoring",["No new video",""],["Success rate, errors, cost per run"],"A simple monitoring view.","Shows the last 20 runs."],
+ ["Case study with governance",["No new video",""],["Problem, solution, hours saved, how data is protected"],"Case study including the governance section.","Under 500 words."]],
+ ["Ship Project 6 (live)",["Loom demo and final polish"],"Project 6: waiting-list admin agent.","All 3 production boxes ticked."],"Station 5 review: agents + governance"],
+"5_0":[[["Portfolio site",["Build a developer portfolio",Y("build developer portfolio website tutorial")],["Headline: AI automation for healthcare and regulated operations","About, projects, contact"],"A one-page portfolio site.","Loads well on your phone."],
+ ["Case studies + Looms",["How to record a great Loom demo",Y("how to record a great loom demo video")],["One section per project: Loom, GitHub, governance note"],"6 project cards with Looms.","Every link works."],
+ ["CV rewrite",["No new video",""],["Title: AI Automation Developer (Healthcare)","NHS experience framed as pathway, data governance and regulated-environment experience"],"A new 2-page CV.","Projects and production skills come first."],
+ ["LinkedIn",["LinkedIn profile tips",Y("linkedin profile tips for developers")],["Niche headline, About, Featured projects"],"An updated LinkedIn.","Your headline says what you do and for whom."]],
+ ["CV review (live)",["Review your CV against 3 real job adverts"],"A CV matched to green-tier roles.","Ready to send."],"positioning and branding"],
+"5_1":[[["Upwork profile",["Upwork tips for AI freelancers",Y("upwork profile tips AI automation freelancer")],["Niche: admin automation for clinics and care providers"],"A live Upwork profile.","Approved and visible."],
+ ["Malt + NHS Jobs",["NHS Jobs",L.NHS],["Malt profile","Save searches for digital, automation and RPA roles"],"Profiles and saved searches.","Alerts are switched on."],
+ ["5 pitches",["No new video",""],["Private clinics, dental practices, care agencies: one problem you can fix for each"],"5 personalised pitches sent.","5 sent."],
+ ["5 applications",["No new video",""],["Green-tier roles; regional and remote, not London only"],"5 applications sent.","5 sent."]],
+ ["Mock interview (live)",["Claude interviews you for an NHS automation role"],"Interview feedback.","You can explain every project and its governance."],"retrospective: what's next"],
+"6_0":[[["Copilot Studio basics",["Microsoft Learn: Copilot Studio",M("copilot studio")],["Topics, knowledge sources, actions"],"A first Copilot agent.","It answers from a knowledge file."],
+ ["Power Platform fundamentals",["Microsoft Learn: Power Platform fundamentals",M("power platform fundamentals")],["Power Apps, Power Automate, Dataverse"],"Notes plus a practice quiz.","You pass a practice test."],
+ ["Helpdesk agent",["Copilot Studio tutorial",Y("copilot studio tutorial build agent")],["Connect it to a Power Automate flow"],"An internal helpdesk agent (fake IT FAQs).","It hands off to a human."],
+ ["Polish",["No new video",""],["Test, document, record a demo"],"A Copilot demo Loom.","Added to your portfolio."]],
+ ["Copilot demo (live)",["Plan how you'd pitch it to an NHS team"],"A Copilot Studio case study.","Shipped."],"Copilot Studio, Power Platform"],
+"6_1":[[["Azure AI Search basics",["Microsoft Learn: Azure AI Search",M("azure ai search")],["Indexes, skillsets, vector search"],"A first search index.","Queries return results."],
+ ["Azure OpenAI",["Microsoft Learn: Azure OpenAI",M("azure openai")],["Enterprise access to models, data stays in Azure"],"A model deployment you can call.","A test call works."],
+ ["Enterprise RAG",["Azure: RAG with AI Search tutorial",Y("azure ai search rag tutorial")],["Connect search + model"],"Your policy Q&A rebuilt on Azure services.","Citations still work."],
+ ["Security and cost",["No new video",""],["Private endpoints, keys in Key Vault, cost alerts"],"A security and cost note.","No keys in code."]],
+ ["Enterprise RAG (live)",["Compare with your Stage 4 version"],"A case study: why enterprises use the Azure version.","Shipped."],"Azure AI Search, Azure OpenAI"],
+"6_2":[[["AWS fundamentals",["AWS Cloud Practitioner course",Y("aws cloud practitioner full course free")],["EC2, S3, IAM, regions"],"Notes on core services.","You can explain IAM."],
+ ["AWS continued",["Same course",""],["Lambda, pricing, security"],"A cost estimate for one project.","Under £10 a month."],
+ ["Deploy on AWS",["Deploy a Python app on AWS",Y("deploy python app aws beginner")],["Deploy one project"],"A project running on AWS.","A public URL works."],
+ ["Bedrock",["Amazon Bedrock for beginners",Y("amazon bedrock tutorial beginners")],["Using Claude through AWS"],"One call to Claude via Bedrock.","It works."]],
+ ["AWS deploy (live)",["Review the setup with Claude"],"An AWS-hosted project with a README.","Shipped."],"AWS basics"],
+"6_3":[[["Databricks intro",["Databricks for beginners",Y("databricks tutorial for beginners")],["Sign up for Databricks Free Edition","Notebooks, clusters"],"A first notebook.","It runs."],
+ ["Spark DataFrames",["Apache Spark for beginners",Y("apache spark dataframe tutorial pyspark beginners")],["DataFrames, filter, groupBy"],"Analyse a public dataset.","Correct summary."],
+ ["Pipeline",["No new video",""],["Clean data → save a table"],"A small data pipeline.","Runs end to end."],
+ ["Feed RAG",["No new video",""],["Export clean text for your RAG bot"],"The pipeline feeds your Q&A bot.","Answers improve."]],
+ ["Data + AI (live)",["Write it up for financial services clients"],"A Databricks + RAG case study.","Shipped."],"Databricks, Spark"],
+"6_4":[[["Kubernetes basics",["Kubernetes for beginners",Y("kubernetes tutorial for beginners")],["Pods, deployments, services"],"Notes and a diagram.","Feynman 9+."],
+ ["Run it locally",["minikube tutorial",Y("minikube tutorial beginners")],["Deploy your container to minikube"],"Your agent in a local cluster.","It runs."],
+ ["LLM monitoring",["LLM observability tutorial",Y("llm observability langfuse tutorial")],["Traces, costs, latency"],"Tracing on your agent.","You can see each step and its cost."],
+ ["Dashboards",["No new video",""],["Track success rate and cost"],"A monitoring view.","Shows the last 20 runs."]],
+ ["Monitored agent (live)",["Review it together"],"A monitored, containerised agent.","Shipped."],"Kubernetes, observability"],
+"6_5":[[["Graph RAG",["Graph RAG explained",Y("graph rag explained")],["Knowledge graphs vs vector search"],"Notes and a comparison table.","You know when to use each."],
+ ["Graph RAG experiment",["Graph RAG tutorial",Y("graph rag tutorial python")],["Build a tiny graph from documents"],"A small Graph RAG demo.","Answers a multi-hop question."],
+ ["Regulated case study",["No new video",""],["Frame your NHS experience: governance, data protection, audit trails"],"A case study draft.","Under 500 words."],
+ ["Apply",["No new video",""],["Target amber-tier roles"],"5 applications.","5 sent."]],
+ ["Enterprise review (live)",["Mock technical interview for an AI Engineer role"],"Interview feedback and next steps.","Done: you finished the roadmap."],"enterprise track review"]
+};
+const expand=(key,sp)=>{const two=key[0]==='6';const lab=two?['Week A Mon–Tue','Week A Wed–Thu','Week B Mon–Tue','Week B Wed–Thu']:['Mon','Tue','Wed','Thu'];
+ const out=sp[0].map((s,k)=>({d:lab[k],t:s[0],m:'60 min',watch:s[1],obj:s[2],build:s[3],done:s[4]}));
+ if(!two)out.push({d:'Fri',t:'Rest or catch-up',m:'15 min',watch:['No new video',''],obj:['Optional: redo one build from memory'],build:'Nothing new. Rest is part of the plan.',done:'You feel ready for Saturday.'});
+ out.push({d:two?'Both Saturdays':'Sat',t:sp[1][0],m:'2 hrs',watch:['Paste the Live build prompt into your project chat',''],obj:sp[1][1],build:sp[1][2],done:sp[1][3]});
+ out.push({d:two?'Both Sundays':'Sun',t:'Review',m:'30 min',watch:['No new video',''],obj:[`Run "Quiz me until I break" on: ${sp[2]}`,'Ask for a one-page cheat sheet and save it in your repo'],build:'Cheat sheet committed to GitHub.',done:'You score 7/10 or more before you miss two in a row.'});
+ return out};
+Object.keys(SPEC).forEach(k=>DAYS[k]=expand(k,SPEC[k]));
+
+const tog=(key)=>DAYS[key]?`<button type="button" class="dtog" aria-expanded="false" data-tog>Show days <span>▾</span></button>`:'';
+const dayHTML=(key)=>DAYS[key]?`<div class="days" hidden>${DAYS[key].map((x,k)=>`<details class="day"><summary><span class="dl"><input type="checkbox" aria-label="${x.d} done" data-id="d${key}_${k}" ${state[`d${key}_${k}`]?'checked':''}><span><b>${x.d}</b> · ${x.t} <small>${x.m}</small></span><span class="chev">›</span></span></summary>
+ <div class="dbody"><p><strong>Watch:</strong> ${x.watch[1]?`<a href="${x.watch[1]}" target="_blank" rel="noopener">${x.watch[0]}</a>`:x.watch[0]}</p>
+ <p style="margin-bottom:4px"><strong>While watching, your objective:</strong></p><ul>${x.obj.map(o=>`<li>${o}</li>`).join('')}</ul>
+ <p><strong>Build:</strong> ${x.build}</p><p class="donep"><strong>Ready to move on when:</strong> ${x.done}</p></div></details>`).join('')}</div>`:'';
+
+const $=id=>document.getElementById(id);
+
+$('todayList').innerHTML=today.map(([i,t])=>`<li>${box(i,t)}</li>`).join('');
+const RD=[{"skill": "JavaScript, Node, APIs, Git", "roles": ["Junior web / backend developer", "Technical support engineer", "QA tester", "IT support analyst"], "proj": [["Clinic opening-hours API in Express with clear docs", "Proves you can build, document and test an API: the core of backend and support roles", [["GitHub: Express REST API examples", "https://github.com/search?q=express+rest+api+example&type=repositories"], ["YouTube: build a REST API with Node and Express", "https://www.youtube.com/results?search_query=build+rest+api+node+express+beginners"]]], ["Bug-tracker mini app with tests", "Shows QA thinking: test cases, edge cases, bug reports", [["GitHub: bug tracker projects", "https://github.com/search?q=bug+tracker+node&type=repositories"], ["YouTube: Jest testing for beginners", "https://www.youtube.com/results?search_query=jest+testing+tutorial+beginners"]]], ["Your dashboard on GitHub Pages (already done)", "Live proof you can ship something people use: put the link on your CV", [["Your repo", ""]]]]}, {"skill": "Python, LLM APIs, prompts, testing", "roles": ["Python developer", "Test automation engineer", "Junior data analyst", "AI prompt / content specialist"], "proj": [["Prompt-comparison script: 3 prompts scored on 20 test cases", "Proves you measure AI quality instead of guessing: rare among beginners", [["GitHub: promptfoo (prompt testing tool)", "https://github.com/promptfoo/promptfoo"], ["GitHub: Anthropic cookbook", "https://github.com/anthropics/anthropic-cookbook"]]], ["One pytest contribution to an open-source project", "Public evidence that you can work in someone else's codebase", [["GitHub: good first issues in Python", "https://github.com/search?q=label:good-first-issue+language:python&type=repositories"], ["YouTube: your first open source contribution", "https://www.youtube.com/results?search_query=first+open+source+contribution+github+beginners"]]], ["Messy appointment CSV → automatic weekly summary", "The everyday task junior analysts are hired to do", [["YouTube: automate Excel reports with Python", "https://www.youtube.com/results?search_query=automate+excel+report+python+pandas"]]]]}, {"skill": "Automation: n8n, Power Automate", "roles": ["RPA developer", "Power Platform developer / admin", "Business process analyst", "Operations automation specialist"], "proj": [["Before/after process map + Power Automate flow with hours saved measured", "Employers buy time saved, so a measured number beats any certificate", [["YouTube: Power Automate real-world examples", "https://www.youtube.com/results?search_query=power+automate+real+world+examples+business"], ["YouTube: process mapping for beginners", "https://www.youtube.com/results?search_query=business+process+mapping+tutorial"]]], ["Approval workflow: SharePoint + Teams notifications", "The exact stack NHS and corporate teams already run", [["YouTube: Power Automate approval flow SharePoint Teams", "https://www.youtube.com/results?search_query=power+automate+approval+flow+sharepoint+teams"], ["GitHub: Power Automate samples", "https://github.com/search?q=power+automate+samples&type=repositories"]]], ["Publish an n8n workflow as a public template", "Public proof that others can reuse your work", [["n8n workflow templates library", "https://n8n.io/workflows/"], ["YouTube: how to share n8n templates", "https://www.youtube.com/results?search_query=n8n+submit+workflow+template"]]]]}, {"skill": "SQL, data cleaning, RAG, MCP", "roles": ["Data analyst", "BI / reporting analyst", "Junior data engineer", "Integration developer"], "proj": [["Power BI dashboard on NHS waiting-time (RTT) statistics", "Public NHS data + an NHS-relevant insight = instant credibility with NHS employers", [["NHS England: RTT waiting-times data", "https://www.england.nhs.uk/statistics/statistical-work-areas/rtt-waiting-times/"], ["YouTube: Power BI dashboard for beginners", "https://www.youtube.com/results?search_query=power+bi+dashboard+tutorial+beginners"]]], ["Scheduled pipeline: messy Excel → clean SQL → dashboard", "Shows you can do the unglamorous data work every team needs", [["YouTube: ETL pipeline with Python and SQL", "https://www.youtube.com/results?search_query=etl+pipeline+python+sql+beginners+project"], ["GitHub: data engineering projects", "https://github.com/search?q=data+engineering+project+python+sql+etl&type=repositories"]]], ["MCP server connecting two systems", "Integration is the skill employers struggle most to hire for", [["GitHub: official MCP servers", "https://github.com/modelcontextprotocol/servers"], ["YouTube: build an MCP server in Python", "https://www.youtube.com/results?search_query=build+mcp+server+python+tutorial"]]]]}, {"skill": "Agents, evals, Docker, governance", "roles": ["AI engineer", "AI governance / compliance analyst", "Information governance officer", "Junior DevOps engineer"], "proj": [["Eval dashboard: agent pass rate across versions", "Proves your AI is reliable, which is what moves it from pilot to production", [["GitHub: Langfuse (LLM monitoring)", "https://github.com/langfuse/langfuse"], ["YouTube: LLM evaluation tutorial", "https://www.youtube.com/results?search_query=llm+evaluation+tutorial+evals"]]], ["Reusable AI governance pack (DPIA + hazard log), written up on LinkedIn", "Very few developers can show governance work, and regulated employers need it", [["ICO: AI and data protection guidance", "https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/artificial-intelligence/"], ["YouTube: DCB0129 clinical safety explained", "https://www.youtube.com/results?search_query=DCB0129+clinical+safety+explained"]]], ["Prompt-injection red-team report on your own apps", "Shows security thinking, which is a big gap in the market", [["OWASP Top 10 for LLM applications", "https://genai.owasp.org/llm-top-10/"], ["GitHub: Microsoft Presidio (PII detection)", "https://github.com/microsoft/presidio"]]]]}, {"skill": "Portfolio, pitching, client work", "roles": ["Freelance automation consultant", "Solutions / pre-sales consultant", "Digital transformation consultant"], "proj": [["2–3 real client projects with genuine written feedback", "Real clients are what turn \"projects\" into a track record", [["YouTube: how to land your first freelance client", "https://www.youtube.com/results?search_query=how+to+get+first+freelance+client+automation"]]], ["10-minute demo video for clinics or care providers", "Shows you can explain technology to non-technical buyers: the core of pre-sales", [["YouTube: how to give a great software demo", "https://www.youtube.com/results?search_query=how+to+give+a+great+software+demo"]]], ["Service packages and prices on your portfolio", "Makes it easy for a client to say yes", [["YouTube: how to price automation services", "https://www.youtube.com/results?search_query=how+to+price+automation+services+freelance"]]]]}, {"skill": "Copilot Studio, Azure, Databricks, Kubernetes", "roles": ["Cloud engineer", "Copilot / AI platform specialist", "MLOps engineer", "Enterprise AI architect (long term)"], "proj": [["Copilot Studio helpdesk agent connected to SharePoint", "The most-requested Microsoft AI skill in enterprise contracts", [["Microsoft Learn: Copilot Studio", "https://learn.microsoft.com/en-us/training/browse/?terms=copilot%20studio"], ["YouTube: Copilot Studio tutorial", "https://www.youtube.com/results?search_query=copilot+studio+tutorial+build+agent"]]], ["Azure AI Search RAG with Key Vault and a cost report", "Enterprise-grade RAG: what the senior roles you saved ask for", [["GitHub: Azure search + OpenAI demo", "https://github.com/Azure-Samples/azure-search-openai-demo"]]], ["Microsoft certifications: PL-900, AZ-900, then AI-102", "Gets your CV past automatic keyword filters", [["Microsoft Learn: certifications", "https://learn.microsoft.com/en-us/credentials/"]]]]}];
+$('rqList').innerHTML=RD.map((r,i)=>`<div class="card rq" id="rq${i}" style="margin-bottom:16px">
+ <div class="rqh"><span class="num">${i+1}</span><span style="flex:1 1 220px"><h3>${r.skill}</h3><small style="color:var(--mute)">Stage ${i+1}: ${P[i].n} · Weeks ${P[i].s}–${P[i].e}</small></span><span class="rqp" id="rqp${i}"></span></div>
+ <div class="rbar"><i id="rqb${i}"></i></div>
+ <p class="rdl"><strong>Roles this unlocks:</strong> ${r.roles.map(x=>`<span class="rchip">${x}</span>`).join('')}</p>
+ <table class="stack rqt"><thead><tr><th>Advised project</th><th>Why it makes you stand out</th><th>Examples to study</th><th>Done</th></tr></thead><tbody>${r.proj.map((x,k)=>`<tr><td><strong>${x[0]}</strong></td><td>${x[1]}</td><td>${x[2].map(e=>e[1]?`<a class="ex" href="${e[1]}" target="_blank" rel="noopener">${e[0]}</a>`:`<span class="ex">${e[0]}</span>`).join('')}</td><td><input type="checkbox" aria-label="${x[0]} done" data-id="rx${i}_${k}" ${state['rx'+i+'_'+k]?'checked':''}></td></tr>`).join('')}</tbody></table>
+</div>`).join('');
+$('phaseList').innerHTML=P.map((p,i)=>`<details class="st" id="st${i}"><summary><span class="num">${i+1}</span><span style="flex:1 1 200px"><h3>${p.n}</h3><small style="color:var(--mute)">Weeks ${p.s}–${p.e} · ${fmt(wkDate(p.s))} to ${fmt(new Date(wkDate(p.e).getTime()+6*864e5))}</small></span><span class="pc" id="r${i}" style="width:auto"></span></summary>
+ <div class="stg"><div><div class="goal"><strong>By the end you can:</strong><ul>${p.goal.map(g=>`<li>${g}</li>`).join('')}</ul></div>
+ <ul class="chk">${p.wk.map((w,j)=>`<li class="wli"><div class="wrow">${box(`p${i}_${j}`,`<span class="wkb">${wlabel(w)}</span> · ${w.t}`)}${tog(i+'_'+j)}</div>${dayHTML(i+'_'+j)}</li>`).join('')}</ul></div>
+ <div><h3 style="margin-bottom:10px">Watch and code along</h3>${p.vids.map(v=>`<div class="vid"><a href="${v[1]}" target="_blank" rel="noopener">${v[0]}</a><span>${v[2]}</span></div>`).join('')}</div></div>
+ <div class="shipgrid"><div class="ship"><strong>Ship:</strong> ${p.ship}</div>
+ <div class="ready" id="rd${i}"><div class="rdh"><strong id="rdt${i}"></strong><span class="rdp" id="rdp${i}"></span></div><div class="rbar"><i id="rdb${i}"></i></div>
+  <p class="rdl"><strong>Roles this stage unlocks:</strong> ${RD[i].roles.join(' · ')}</p>
+  <p class="rdl" style="margin-bottom:2px"><strong>Stand-out projects for these roles:</strong></p>
+  <ul class="chk">${RD[i].proj.map((x,k)=>`<li>${box(`rx${i}_${k}`,x[0])}</li>`).join('')}</ul></div></div></details>`).join('');
+$('jobRows').innerHTML=jobs.map(j=>`<tr><td><strong>${j[0]}</strong></td><td><span class="tier ${j[1]}">${tierName[j[1]]}</span></td><td>${j[2]}</td><td class="n">${j[3]||'–'}</td></tr>`).join('');
+$('promptList').innerHTML=prompts.map((p,i)=>`<div class="card"><h2 style="margin:0">${p[0]}</h2><small style="color:var(--mute)">${p[1]}</small><pre id="pr${i}">${p[2]}</pre><button class="pri" data-copy="pr${i}">Copy prompt</button></div>`).join('');
+const ck=(id,l)=>`<input type="checkbox" aria-label="${l}" data-id="${id}" ${state[id]?'checked':''}>`;
+$('projRows').innerHTML=projects.map((p,i)=>`<tr><td><strong>${p[0]}</strong></td><td>${p[1]}</td><td>${p[2]}</td><td>${ck('proj'+i+'t',p[0]+' tests')}</td><td>${ck('proj'+i+'d',p[0]+' deployed')}</td><td>${ck('proj'+i+'n',p[0]+' data note')}</td><td>${ck('proj'+i,p[0]+' done')}</td></tr>`).join('');
+$('insideList').innerHTML=inside.map(([id,t])=>`<li>${box(id,t)}</li>`).join('');
+
+const pids=P.map((p,i)=>p.wk.map((_,j)=>`p${i}_${j}`));
+const all=[...new Set([...document.querySelectorAll('input[data-id]')].map(x=>x.dataset.id))].filter(id=>!/^(d\d|rx)/.test(id));
+const frac=()=>pids.map(ids=>ids.filter(id=>state[id]).length/ids.length);
+const cur=()=>{const k=frac().findIndex(x=>x<1);return k<0?P.length-1:k};
+const colors=['var(--cor)','var(--blu)'];
+
+function weekDays(){const t=new Date();t.setHours(0,0,0,0);const m=new Date(t);m.setDate(t.getDate()-((t.getDay()+6)%7));return [...Array(7)].map((_,i)=>{const d=new Date(m);d.setDate(m.getDate()+i);return d})}
+const csvg=$('chartsvg');
+function chart(){
+ const W=csvg.clientWidth,H=csvg.clientHeight,days=weekDays(),names=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],todayK=dkey(new Date());
+ const vals=days.map(d=>log[dkey(d)]||0),max=Math.max(120,...vals),l=34,b=26,t=10,cw=(W-l)/7,bw=Math.min(16,cw*.35);
+ let o='';[0,60,120].filter(v=>v<=max).forEach(v=>{const y=t+(H-t-b)*(1-v/max);o+=`<line x1="${l}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--rule)" ${v===60?'stroke-dasharray="4 4" stroke="var(--mute)"':''}/><text x="${l-6}" y="${y+4}" text-anchor="end" font-size="11" fill="var(--mute)">${v}</text>`});
+ vals.forEach((v,i)=>{const x=l+cw*i+cw/2,h=(H-t-b)*(v/max),y=H-b-h;
+  o+=`<rect x="${x-bw/2}" y="${y}" width="${bw}" height="${Math.max(h,0)}" rx="${bw/2}" fill="${v>=60?'var(--ind)':'var(--cor)'}"/>`;
+  o+=`<text x="${x}" y="${H-8}" text-anchor="middle" font-size="11.5" fill="${dkey(days[i])===todayK?'var(--ind)':'var(--mute)'}" font-weight="${dkey(days[i])===todayK?600:400}">${names[i]}</text>`;});
+ o+=`<text x="${W}" y="${t+(H-t-b)*(1-60/max)-5}" text-anchor="end" font-size="11" fill="var(--mute)">60 min target</text>`;
+ csvg.innerHTML=o;
+}
+const cro=new ResizeObserver(chart);cro.observe($('chart'));
+
+function render(){
+ {const RR=[];P.forEach((p,i)=>{const ids=pids.slice(0,i+1).flat().concat(projects.map((x,k)=>x[2]<=i+1?'proj'+k:null).filter(Boolean));const d=ids.filter(id=>state[id]).length,pct=Math.round(d/ids.length*100),left=100-pct,el=$('rd'+i);if(!el)return;el.classList.toggle('go',left===0);$('rdt'+i).textContent=left===0?'Ready to apply ✓':'Job readiness';$('rdp'+i).textContent=left===0?'100%':`${left}% left`;$('rdb'+i).style.width=pct+'%';
+ const q=$('rq'+i);if(q){q.classList.toggle('go',left===0);$('rqp'+i).textContent=left===0?'Ready to apply ✓':`${left}% left`;$('rqb'+i).style.width=pct+'%';}
+ RR[i]=left;});
+ const rs=$('rsum');if(rs){const ready=RR.filter(x=>x===0).length,roles=RD.filter((r,i)=>RR[i]===0).reduce((a,r)=>a+r.roles.length,0);rs.innerHTML=`<div><b>${ready} / 7</b><small>skill areas ready</small></div><div><b>${roles}</b><small>roles unlocked</small></div><div><b>${RD.flatMap((r,i)=>r.proj.map((_,k)=>'rx'+i+'_'+k)).filter(id=>state[id]).length} / 21</b><small>stand-out projects done</small></div>`}}
+ const f=frac(),c=cur(),n=all.filter(id=>state[id]).length,pc=Math.round(n/all.length*100);
+ const wi=pids[c].findIndex(id=>!state[id]),w=P[c].wk[wi<0?0:wi];
+ $('welcome').innerHTML=`You've completed <strong>${pc}%</strong> of the whole roadmap. You're on <strong>station ${c+1}: ${P[c].n}</strong>, ${wlabel(w).toLowerCase()}. One coffee, one hour, one commit.`;
+ $('stations').innerHTML=P.map((p,i)=>{const v=Math.round(f[i]*100),r=19,C=2*Math.PI*r,on=i===c;return `<a href="#weeks" class="hp ${on?'on':''}" style="text-decoration:none;color:inherit"><span class="ringw"><svg viewBox="0 0 46 46"><circle cx="23" cy="23" r="${r}" fill="none" stroke="${on?'rgba(255,255,255,.3)':'var(--rule)'}" stroke-width="4"/><circle cx="23" cy="23" r="${r}" fill="none" stroke="${on?'#fff':'var(--ind)'}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${C*v/100} ${C}"/></svg><em>${v}%</em></span><span style="flex:1">${p.n}<small>Weeks ${p.s}–${p.e} · ${p.wk.length} steps</small></span><span aria-hidden="true">›</span></a>`}).join('');
+ const icons=['<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M10 9l5 3-5 3z" fill="#fff"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/></svg>'];
+ const nv=P[c].vids[0];
+ $('nextCards').innerHTML=[['n1','#weeks',`This week: ${wlabel(w)}`,w.t.split('.')[0],icons[0]],['n2',nv[1],'Next video',nv[0]+' · '+nv[2],icons[1]],['n3','#portfolio',P[c].ship.split(':')[0],(P[c].ship.split(':')[1]||'').split(',')[0].trim(),icons[2]]].map(x=>`<a class="nc ${x[0]}" href="${x[1]}" ${x[1].startsWith('http')?'target="_blank" rel="noopener"':''}><span class="tile">${x[4]}</span><span><b>${x[2]}</b><small style="display:block">${x[3]}</small></span><span class="go"><small></small><span class="arr">›</span></span></a>`).join('');
+ {const now=new Date(),y=now.getFullYear(),m=now.getMonth(),first=new Date(y,m,1),off=first.getDay(),dim=new Date(y,m+1,0).getDate(),prev=new Date(y,m,0).getDate();
+  $('calT').textContent=now.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  let o=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="h">${d}</div>`).join('');
+  for(let i=0;i<off;i++)o+=`<div><span class="o">${prev-off+1+i}</span></div>`;
+  for(let d=1;d<=dim;d++){const k=`${y}-${m+1}-${d}`;o+=`<div><span class="${d===now.getDate()?'td':''} ${(log[k]||0)>0?'st':''}">${d}</span></div>`}
+  const tail=(7-(off+dim)%7)%7;for(let i=1;i<=tail;i++)o+=`<div><span class="o">${i}</span></div>`;
+  $('cal').innerHTML=o;}
+ $('thisweek').innerHTML=`<span class="tier t1">${wlabel(w)} · starts ${fmt(wkDate(w.from))}</span><p style="margin:10px 0">${w.t}</p><div class="wli">${tog(c+'_'+(wi<0?0:wi))}${dayHTML(c+'_'+(wi<0?0:wi))}</div>${box(pids[c][wi<0?0:wi],'Mark this week done')}<p style="margin:8px 0 0;color:var(--mute);font-size:13.5px">Ship this station: ${P[c].ship}</p>`;
+ $('nextVids').innerHTML=P.slice(c,c+2).flatMap((p,k)=>p.vids.slice(0,k?2:4).map(v=>`<tr><td><a href="${v[1]}" target="_blank" rel="noopener">${v[0]}</a></td><td class="n">${v[2]}</td><td>${p.n}</td></tr>`)).join('');
+ const up=[];P.forEach((p,i)=>p.wk.forEach((w,j)=>{if(!state[`p${i}_${j}`])up.push([w,p])}));
+ $('milestones').innerHTML=up.slice(0,4).map(([w,p])=>`<div class="ms"><i>W${w.from}</i><div>${w.t.split('.')[0]}<small>${fmt(wkDate(w.from))} · ${p.n}</small></div></div>`).join('')||'<p>All done. Time to invoice!</p>';
+ $('badges').innerHTML=projects.map((p,i)=>`<div class="badge ${state['proj'+i]?'got':''}"><span>P${i+1}</span>${p[0].split(' ').slice(0,2).join(' ')}</div>`).join('');
+ P.forEach((p,i)=>$('r'+i).textContent=Math.round(f[i]*100)+'%');
+ const days=weekDays(),t=dkey(new Date());
+ $('streak').innerHTML=days.map(d=>`<div><span class="${(log[dkey(d)]||0)>0?'y':''} ${dkey(d)===t?'t':''}">${d.getDate()}</span>${d.toLocaleDateString('en-GB',{weekday:'short'})}</div>`).join('');
+ let s=0,d=new Date();if(!(log[dkey(d)]>0))d.setDate(d.getDate()-1);while(log[dkey(d)]>0){s++;d.setDate(d.getDate()-1)}
+ const tot=days.reduce((a,d)=>a+(log[dkey(d)]||0),0);
+ $('streakTxt').textContent=`${s}-day streak · ${Math.round(tot/6)/10} hours this week (goal: 6)`;
+ chart();
+}
+
+const titles={dashboard:'Dashboard',weeks:'Week plan',readiness:'Job readiness',jobs:'Jobs to target',prompts:'Study prompts',portfolio:'Portfolio'};
+function route(){const v=(location.hash||'#dashboard').slice(1),k=titles[v]?v:'dashboard';
+ document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+k));
+ document.querySelectorAll('.side a').forEach(a=>a.classList.toggle('on',a.dataset.v===k));
+ $('vtitle').textContent=titles[k];if(k==='weeks'){const e=$('st'+cur());if(e)e.open=true}if(k==='dashboard')chart();}
+window.addEventListener('hashchange',route);
+
+$('q').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();if(q.length<2){$('results').innerHTML='';return}
+ const hits=[];P.forEach(p=>{p.wk.forEach(w=>{if((w.t+p.n).toLowerCase().includes(q))hits.push(`<div class="res"><a href="#weeks">${wlabel(w)}: ${w.t}</a><small>${p.n}</small></div>`)});p.vids.forEach(v=>{if(v[0].toLowerCase().includes(q))hits.push(`<div class="res"><a href="${v[1]}" target="_blank" rel="noopener">${v[0]}</a><small>${p.n} · ${v[2]}</small></div>`)})});
+ jobs.forEach(j=>{if(j[0].toLowerCase().includes(q))hits.push(`<div class="res"><a href="#jobs">${j[0]}</a><small>Job title</small></div>`)});
+ $('results').innerHTML=`<h2>${hits.length} result${hits.length===1?'':'s'}</h2>`+(hits.slice(0,12).join('')||'<p>Nothing found. Try "python", "rag" or "n8n".</p>')});
+
+document.addEventListener('change',e=>{const c=e.target.closest('input[data-id]');if(!c)return;state[c.dataset.id]=c.checked;
+ document.querySelectorAll(`input[data-id="${c.dataset.id}"]`).forEach(x=>{x.checked=c.checked;const l=x.closest('label');if(l)l.classList.toggle('on',c.checked)});save();render()});
+document.addEventListener('click',async e=>{
+ const tg=e.target.closest('[data-tog]');if(tg){const box=tg.closest('.wli').querySelector('.days');const open=box.hidden;box.hidden=!open;tg.setAttribute('aria-expanded',open);tg.firstChild.textContent=open?'Hide days ':'Show days ';tg.classList.toggle('open',open);return}
+ const al=e.target.closest('[data-all]');if(al){const open=al.dataset.all==='1';document.querySelectorAll('#v-weeks details.st').forEach(d=>d.open=open||d.open);document.querySelectorAll('#v-weeks .wli').forEach(li=>{const b=li.querySelector('.days'),t=li.querySelector('[data-tog]');if(!b||!t)return;b.hidden=!open;t.setAttribute('aria-expanded',open);t.firstChild.textContent=open?'Hide days ':'Show days ';t.classList.toggle('open',open)});if(!open)document.querySelectorAll('#v-weeks details.st').forEach((d,i)=>d.open=i===cur());return}
+ const lg=e.target.closest('button[data-log]');if(lg){const k=dkey(new Date()),v=+lg.dataset.log;log[k]=v?(log[k]||0)+v:0;save();render();return}
+ const b=e.target.closest('button[data-copy]');if(!b)return;const el=$(b.dataset.copy);
+ try{await navigator.clipboard.writeText(el.textContent);b.textContent='Copied ✓'}catch(err){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected: press Ctrl+C'}
+ setTimeout(()=>b.textContent='Copy prompt',2000)});
+
+render();route();
+}
+</script>
+</body>
+</html>
